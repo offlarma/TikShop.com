@@ -6,6 +6,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
+import { UgcForm } from "./ugc-form";
+
 export default function UgcScriptsPage() {
   return (
     <div className="space-y-8">
@@ -21,11 +23,13 @@ export default function UgcScriptsPage() {
         <CardHeader>
           <CardTitle>Generate a new script</CardTitle>
           <CardDescription>
-            The input form will live here. AI generation will be wired up in the
-            next phase.
+            Provide the product details below. The script will stream in
+            real-time on the right.
           </CardDescription>
         </CardHeader>
-        <CardContent />
+        <CardContent>
+          <UgcForm />
+        </CardContent>
       </Card>
     </div>
   );

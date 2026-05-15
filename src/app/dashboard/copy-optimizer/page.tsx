@@ -6,6 +6,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
+import { CopyOptimizerForm } from "./copy-form";
+
 export default function CopyOptimizerPage() {
   return (
     <div className="space-y-8">
@@ -22,11 +24,13 @@ export default function CopyOptimizerPage() {
         <CardHeader>
           <CardTitle>Optimize your copy</CardTitle>
           <CardDescription>
-            The input form will live here. AI generation will be wired up in the
-            next phase.
+            We will return 3 variants with different angles plus a short
+            explanation of the techniques used.
           </CardDescription>
         </CardHeader>
-        <CardContent />
+        <CardContent>
+          <CopyOptimizerForm />
+        </CardContent>
       </Card>
     </div>
   );

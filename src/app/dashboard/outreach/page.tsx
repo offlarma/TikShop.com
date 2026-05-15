@@ -6,6 +6,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
+import { OutreachForm } from "./outreach-form";
+
 export default function OutreachPage() {
   return (
     <div className="space-y-8">
@@ -22,11 +24,12 @@ export default function OutreachPage() {
         <CardHeader>
           <CardTitle>Create an outreach message</CardTitle>
           <CardDescription>
-            The input form will live here. AI generation will be wired up in the
-            next phase.
+            We will generate a tailored message plus a short follow-up.
           </CardDescription>
         </CardHeader>
-        <CardContent />
+        <CardContent>
+          <OutreachForm />
+        </CardContent>
       </Card>
     </div>
   );
