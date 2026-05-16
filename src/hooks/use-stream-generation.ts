@@ -80,6 +80,17 @@ export function useStreamGeneration() {
 
         buffer += decoder.decode();
         setOutput(buffer);
+
+        // Server returned 200 + an empty stream. This typically means
+        // the upstream AI provider rejected the request (invalid API
+        // key, exhausted quota, content filter, etc.). The real error
+        // lives in the server logs — surface a human-readable hint
+        // here so the user doesn't have to dig through the terminal.
+        if (!buffer.trim()) {
+          throw new Error(
+            "The AI service did not return a result. This usually means the OpenAI API key is invalid or out of credit. Check the server logs for details."
+          );
+        }
       } catch (err) {
         if ((err as Error).name === "AbortError") return;
         const message =
