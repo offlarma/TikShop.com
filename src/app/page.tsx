@@ -28,7 +28,7 @@ export default async function HomePage() {
   // landing still renders if Supabase env vars are missing or invalid.
   let isAuthenticated = false;
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
     const {
       data: { user },
     } = await supabase.auth.getUser();

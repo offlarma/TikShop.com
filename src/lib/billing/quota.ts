@@ -34,7 +34,7 @@ function startOfNextMonthUTC(): Date {
 export async function getSubscription(
   userId: string
 ): Promise<Subscription | null> {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data, error } = await supabase
     .from("subscriptions")
     .select("*")
@@ -49,7 +49,7 @@ export async function getSubscription(
 }
 
 export async function countMonthlyUsage(userId: string): Promise<number> {
-  const supabase = createClient();
+  const supabase = await createClient();
   const since = startOfCurrentMonthUTC().toISOString();
   const { count, error } = await supabase
     .from("usage_events")
@@ -114,7 +114,7 @@ export async function recordUsageEvent(params: {
   tool: "ugc-scripts" | "outreach" | "copy-optimizer";
   generationId?: string | null;
 }): Promise<void> {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { error } = await supabase.from("usage_events").insert({
     user_id: params.userId,
     tool: params.tool,

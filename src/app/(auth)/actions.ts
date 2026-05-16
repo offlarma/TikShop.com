@@ -18,7 +18,7 @@ export async function signIn(formData: FormData): Promise<AuthResult> {
     return { error: "Email and password are required." };
   }
 
-  const supabase = createClient();
+  const supabase = await createClient();
   const { error } = await supabase.auth.signInWithPassword({ email, password });
 
   if (error) {
@@ -41,7 +41,7 @@ export async function signUp(formData: FormData): Promise<AuthResult> {
     return { error: "Password must be at least 6 characters." };
   }
 
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data, error } = await supabase.auth.signUp({ email, password });
 
   if (error) {
@@ -60,7 +60,7 @@ export async function signUp(formData: FormData): Promise<AuthResult> {
 }
 
 export async function signOut() {
-  const supabase = createClient();
+  const supabase = await createClient();
   await supabase.auth.signOut();
   revalidatePath("/", "layout");
   redirect("/login");
@@ -78,7 +78,7 @@ export async function requestPasswordReset(
   const email = String(formData.get("email") ?? "").trim();
   if (!email) return { error: "Email is required." };
 
-  const supabase = createClient();
+  const supabase = await createClient();
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
     redirectTo: `${getAppUrlFromHeaders()}/auth/callback?next=/dashboard/account/password`,
   });
@@ -101,7 +101,7 @@ export async function updatePasswordAction(
     return { error: "Password must be at least 6 characters." };
   }
 
-  const supabase = createClient();
+  const supabase = await createClient();
   const { error } = await supabase.auth.updateUser({ password });
   if (error) return { error: error.message };
 
