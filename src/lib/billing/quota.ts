@@ -1,5 +1,6 @@
 import "server-only";
 
+import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { getPlanConfig } from "@/lib/billing/plans";
 import type { Plan, Subscription, SubscriptionStatus } from "@/types/db";
@@ -114,7 +115,21 @@ export async function recordUsageEvent(params: {
   tool: "ugc-scripts" | "outreach" | "copy-optimizer";
   generationId?: string | null;
 }): Promise<void> {
-  const supabase = await createClient();
+  // Same reasoning as insertGeneration: this is called from streamText's
+  // onFinish callback after the request-scoped cookie context has been
+  // torn down. Use the admin client so RLS doesn't silently reject the
+  // insert. params.userId was already validated by requireUser().
+  let supabase;
+  try {
+    supabase = createAdminClient();
+  } catch (err) {
+    console.error(
+      "[quota.recordUsageEvent] SUPABASE_SERVICE_ROLE_KEY is required to track usage.",
+      err
+    );
+    return;
+  }
+
   const { error } = await supabase.from("usage_events").insert({
     user_id: params.userId,
     tool: params.tool,

@@ -1,5 +1,6 @@
 import "server-only";
 
+import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import type { Generation, Tool } from "@/types/db";
 
@@ -31,7 +32,23 @@ export async function insertGeneration(params: {
   input: Record<string, unknown>;
   output: string;
 }): Promise<Generation | null> {
-  const supabase = await createClient();
+  // This is typically called from streamText's onFinish callback, which
+  // fires AFTER the request-scoped cookie context has been torn down.
+  // At that point the user-scoped Supabase client cannot read the auth
+  // cookies anymore, so RLS would silently reject the insert. We use
+  // the admin (service-role) client instead — safe because params.userId
+  // was just validated by requireUser() earlier in the same request.
+  let supabase;
+  try {
+    supabase = createAdminClient();
+  } catch (err) {
+    console.error(
+      "[generations.insert] SUPABASE_SERVICE_ROLE_KEY is required to persist generations.",
+      err
+    );
+    return null;
+  }
+
   const { data, error } = await supabase
     .from(TABLE)
     .insert({
