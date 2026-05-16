@@ -5,10 +5,13 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { listGenerations } from "@/lib/db/generations";
 
-import { OutreachForm } from "./outreach-form";
+import { OutreachTool } from "./outreach-tool";
 
-export default function OutreachPage() {
+export default async function OutreachPage() {
+  const history = await listGenerations("outreach", 10);
+
   return (
     <div className="space-y-8">
       <div className="space-y-2">
@@ -24,11 +27,12 @@ export default function OutreachPage() {
         <CardHeader>
           <CardTitle>Create an outreach message</CardTitle>
           <CardDescription>
-            We will generate a tailored message plus a short follow-up.
+            We will generate a tailored message plus a short follow-up. Every
+            generation is saved automatically below.
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <OutreachForm />
+          <OutreachTool initialHistory={history} />
         </CardContent>
       </Card>
     </div>

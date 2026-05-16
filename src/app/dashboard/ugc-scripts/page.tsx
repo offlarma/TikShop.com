@@ -5,10 +5,13 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { listGenerations } from "@/lib/db/generations";
 
-import { UgcForm } from "./ugc-form";
+import { UgcTool } from "./ugc-tool";
 
-export default function UgcScriptsPage() {
+export default async function UgcScriptsPage() {
+  const history = await listGenerations("ugc-scripts", 10);
+
   return (
     <div className="space-y-8">
       <div className="space-y-2">
@@ -24,11 +27,11 @@ export default function UgcScriptsPage() {
           <CardTitle>Generate a new script</CardTitle>
           <CardDescription>
             Provide the product details below. The script will stream in
-            real-time on the right.
+            real-time on the right and be saved automatically.
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <UgcForm />
+          <UgcTool initialHistory={history} />
         </CardContent>
       </Card>
     </div>
