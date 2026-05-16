@@ -3,10 +3,12 @@ import { streamText } from "ai";
 import { aiModel, generationConfig } from "@/lib/openai";
 import {
   badRequest,
+  enforceQuotaAndRateLimit,
   ensureOpenAIConfigured,
   requireUser,
 } from "@/lib/api-helpers";
 import { insertGeneration } from "@/lib/db/generations";
+import { recordUsageEvent } from "@/lib/billing/quota";
 import { buildOutreachPrompt, outreachInputSchema } from "@/lib/prompts";
 
 export const runtime = "nodejs";
@@ -18,6 +20,9 @@ export async function POST(request: Request) {
 
   const configError = ensureOpenAIConfigured();
   if (configError) return configError;
+
+  const limited = await enforceQuotaAndRateLimit(user!.id);
+  if (limited) return limited;
 
   let payload: unknown;
   try {
@@ -41,11 +46,16 @@ export async function POST(request: Request) {
     ...generationConfig,
     async onFinish({ text }) {
       if (!user || !text.trim()) return;
-      await insertGeneration({
+      const generation = await insertGeneration({
         userId: user.id,
         tool: "outreach",
         input: input as unknown as Record<string, unknown>,
         output: text,
+      });
+      await recordUsageEvent({
+        userId: user.id,
+        tool: "outreach",
+        generationId: generation?.id,
       });
     },
   });

@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 
+import { checkQuota } from "@/lib/billing/quota";
+import { rateLimit } from "@/lib/rate-limit";
 import { createClient } from "@/lib/supabase/server";
 
 export async function requireUser() {
@@ -35,5 +37,48 @@ export function ensureOpenAIConfigured() {
       { status: 500 }
     );
   }
+  return null;
+}
+
+/**
+ * Apply per-user rate limit (default: 10 requests / minute) and monthly
+ * quota check. Returns null when the user can proceed, or a Response to
+ * send back to the client otherwise.
+ */
+export async function enforceQuotaAndRateLimit(
+  userId: string
+): Promise<NextResponse | null> {
+  const rl = await rateLimit(`ai:${userId}`, {
+    capacity: 10,
+    refillMs: 60_000,
+  });
+  if (!rl.allowed) {
+    return NextResponse.json(
+      {
+        error:
+          "You're sending requests too quickly. Please wait a moment and try again.",
+      },
+      {
+        status: 429,
+        headers: {
+          "Retry-After": String(rl.retryAfterSec),
+          "X-RateLimit-Remaining": String(rl.remaining),
+          "X-RateLimit-Reset": String(rl.reset),
+        },
+      }
+    );
+  }
+
+  const quota = await checkQuota(userId);
+  if (!quota.ok) {
+    return NextResponse.json(
+      {
+        error: quota.reason,
+        snapshot: quota.snapshot,
+      },
+      { status: 402 }
+    );
+  }
+
   return null;
 }
