@@ -1,7 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import { Check, Copy, FileText, Loader2 } from "lucide-react";
+import {
+  Check,
+  Copy,
+  Download,
+  FileText,
+  Loader2,
+} from "lucide-react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -14,6 +22,8 @@ interface OutputPanelProps {
   error: string | null;
   emptyTitle: string;
   emptyDescription: string;
+  /** Used as the suggested filename for the "Export .txt" button. */
+  exportName?: string;
 }
 
 export function OutputPanel({
@@ -22,6 +32,7 @@ export function OutputPanel({
   error,
   emptyTitle,
   emptyDescription,
+  exportName = "growth-suite-output",
 }: OutputPanelProps) {
   const [copied, setCopied] = useState(false);
 
@@ -35,6 +46,20 @@ export function OutputPanel({
     } catch {
       toast.error("Could not copy. Please copy manually.");
     }
+  }
+
+  function handleExport() {
+    if (!output) return;
+    const blob = new Blob([output], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    const safeName = exportName.replace(/[^a-z0-9_-]+/gi, "-").toLowerCase();
+    a.download = `${safeName}-${Date.now()}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
   }
 
   const showEmpty = !output && !isStreaming && !error;
@@ -52,25 +77,37 @@ export function OutputPanel({
             </span>
           ) : null}
         </div>
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={handleCopy}
-          disabled={!output || isStreaming}
-        >
-          {copied ? (
-            <>
-              <Check className="h-4 w-4" />
-              Copied
-            </>
-          ) : (
-            <>
-              <Copy className="h-4 w-4" />
-              Copy
-            </>
-          )}
-        </Button>
+        <div className="flex items-center gap-1">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={handleExport}
+            disabled={!output || isStreaming}
+          >
+            <Download className="h-4 w-4" />
+            Export .txt
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={handleCopy}
+            disabled={!output || isStreaming}
+          >
+            {copied ? (
+              <>
+                <Check className="h-4 w-4" />
+                Copied
+              </>
+            ) : (
+              <>
+                <Copy className="h-4 w-4" />
+                Copy
+              </>
+            )}
+          </Button>
+        </div>
       </div>
 
       <div
@@ -89,7 +126,7 @@ export function OutputPanel({
             </p>
           </div>
         ) : output ? (
-          <FormattedOutput text={output} />
+          <MarkdownOutput text={output} />
         ) : (
           <StreamingSkeleton />
         )}
@@ -110,101 +147,95 @@ function StreamingSkeleton() {
   );
 }
 
-/**
- * Lightweight Markdown-ish renderer that supports:
- *   - "## " headings
- *   - "- " bullet lists
- *   - blank-line separated paragraphs
- * Intentionally minimal: keeps the output panel dependency-free.
- */
-function FormattedOutput({ text }: { text: string }) {
-  const blocks = parseBlocks(text);
-
+function MarkdownOutput({ text }: { text: string }) {
   return (
-    <div className="space-y-4 text-foreground">
-      {blocks.map((block, index) => {
-        if (block.kind === "heading") {
-          return (
-            <h3
-              key={index}
-              className="text-sm font-semibold uppercase tracking-wide text-muted-foreground"
-            >
-              {block.content}
+    <div className="prose-output text-sm text-foreground">
+      <ReactMarkdown
+        remarkPlugins={[remarkGfm]}
+        components={{
+          h1: ({ children }) => (
+            <h2 className="mt-4 text-base font-semibold first:mt-0">
+              {children}
+            </h2>
+          ),
+          h2: ({ children }) => (
+            <h3 className="mt-4 text-sm font-semibold uppercase tracking-wide text-muted-foreground first:mt-0">
+              {children}
             </h3>
-          );
-        }
-        if (block.kind === "list") {
-          return (
-            <ul
-              key={index}
-              className="list-disc space-y-1 pl-5 text-sm marker:text-muted-foreground"
-            >
-              {block.items.map((item, i) => (
-                <li key={i}>{item}</li>
-              ))}
+          ),
+          h3: ({ children }) => (
+            <h4 className="mt-3 text-sm font-semibold">{children}</h4>
+          ),
+          p: ({ children }) => (
+            <p className="my-2 whitespace-pre-wrap leading-relaxed">
+              {children}
+            </p>
+          ),
+          ul: ({ children }) => (
+            <ul className="my-2 list-disc space-y-1 pl-5 marker:text-muted-foreground">
+              {children}
             </ul>
-          );
-        }
-        return (
-          <p key={index} className="whitespace-pre-wrap text-sm">
-            {block.content}
-          </p>
-        );
-      })}
+          ),
+          ol: ({ children }) => (
+            <ol className="my-2 list-decimal space-y-1 pl-5 marker:text-muted-foreground">
+              {children}
+            </ol>
+          ),
+          li: ({ children }) => <li>{children}</li>,
+          strong: ({ children }) => (
+            <strong className="font-semibold text-foreground">{children}</strong>
+          ),
+          em: ({ children }) => <em className="italic">{children}</em>,
+          a: ({ children, href }) => (
+            <a
+              href={href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-foreground underline underline-offset-2 hover:text-primary"
+            >
+              {children}
+            </a>
+          ),
+          code: ({ children, ...props }) => (
+            <code
+              className="rounded bg-muted px-1.5 py-0.5 font-mono text-[0.85em]"
+              {...props}
+            >
+              {children}
+            </code>
+          ),
+          pre: ({ children }) => (
+            <pre className="my-3 overflow-x-auto rounded-md border bg-muted p-3 text-xs leading-relaxed">
+              {children}
+            </pre>
+          ),
+          blockquote: ({ children }) => (
+            <blockquote className="my-3 border-l-2 border-muted-foreground/30 pl-3 italic text-muted-foreground">
+              {children}
+            </blockquote>
+          ),
+          hr: () => <hr className="my-4 border-border" />,
+          table: ({ children }) => (
+            <div className="my-3 overflow-x-auto">
+              <table className="w-full border-collapse text-xs">
+                {children}
+              </table>
+            </div>
+          ),
+          th: ({ children }) => (
+            <th className="border border-border bg-muted px-2 py-1 text-left font-semibold">
+              {children}
+            </th>
+          ),
+          td: ({ children }) => (
+            <td className="border border-border px-2 py-1 align-top">
+              {children}
+            </td>
+          ),
+        }}
+      >
+        {text}
+      </ReactMarkdown>
     </div>
   );
-}
-
-type Block =
-  | { kind: "heading"; content: string }
-  | { kind: "paragraph"; content: string }
-  | { kind: "list"; items: string[] };
-
-function parseBlocks(text: string): Block[] {
-  const lines = text.split(/\r?\n/);
-  const blocks: Block[] = [];
-  let paragraph: string[] = [];
-  let list: string[] = [];
-
-  const flushParagraph = () => {
-    if (paragraph.length === 0) return;
-    blocks.push({ kind: "paragraph", content: paragraph.join("\n").trim() });
-    paragraph = [];
-  };
-  const flushList = () => {
-    if (list.length === 0) return;
-    blocks.push({ kind: "list", items: list });
-    list = [];
-  };
-
-  for (const rawLine of lines) {
-    const line = rawLine.trimEnd();
-
-    if (line.startsWith("## ")) {
-      flushParagraph();
-      flushList();
-      blocks.push({ kind: "heading", content: line.slice(3).trim() });
-      continue;
-    }
-
-    const bulletMatch = line.match(/^\s*[-*]\s+(.*)$/);
-    if (bulletMatch) {
-      flushParagraph();
-      list.push(bulletMatch[1]);
-      continue;
-    }
-
-    if (line.trim() === "") {
-      flushParagraph();
-      flushList();
-      continue;
-    }
-
-    flushList();
-    paragraph.push(line);
-  }
-
-  flushParagraph();
-  flushList();
-  return blocks;
 }

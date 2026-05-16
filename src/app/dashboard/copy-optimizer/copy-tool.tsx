@@ -210,6 +210,7 @@ export function CopyOptimizerTool({
           error={error}
           emptyTitle="Your optimized variants will appear here"
           emptyDescription="Paste the copy you want to improve and we'll produce 3 conversion-focused variants with explanations."
+          exportName={`copy-${values.copyType}`}
         />
       </div>
 

@@ -1,12 +1,13 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useMemo, useState, useTransition } from "react";
 import {
   ChevronDown,
   ChevronUp,
   Clock,
   Loader2,
   RotateCw,
+  Search,
   Star,
   Trash2,
 } from "lucide-react";
@@ -20,6 +21,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import {
   deleteGenerationAction,
   setFavoriteAction,
@@ -44,7 +46,21 @@ export function GenerationHistory<Input>({
 }: GenerationHistoryProps<Input>) {
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [pendingId, setPendingId] = useState<string | null>(null);
+  const [query, setQuery] = useState("");
+  const [favoritesOnly, setFavoritesOnly] = useState(false);
   const [, startTransition] = useTransition();
+
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return items.filter((item) => {
+      if (favoritesOnly && !item.is_favorite) return false;
+      if (!q) return true;
+      const summary = inputSummary(item.input as Input).toLowerCase();
+      return (
+        summary.includes(q) || item.output.toLowerCase().includes(q)
+      );
+    });
+  }, [items, query, favoritesOnly, inputSummary]);
 
   function handleToggleFavorite(item: Generation) {
     const previous = items;
@@ -109,8 +125,41 @@ export function GenerationHistory<Input>({
           pinned to top
         </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-2">
-        {items.map((item) => {
+      <CardContent className="space-y-3">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+          <div className="relative flex-1">
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              type="search"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search by input or output..."
+              className="pl-9"
+            />
+          </div>
+          <Button
+            type="button"
+            variant={favoritesOnly ? "default" : "outline"}
+            size="sm"
+            onClick={() => setFavoritesOnly((v) => !v)}
+          >
+            <Star
+              className={cn(
+                "h-4 w-4",
+                favoritesOnly && "fill-amber-300 text-amber-200"
+              )}
+            />
+            {favoritesOnly ? "Showing favorites" : "Favorites only"}
+          </Button>
+        </div>
+
+        {filtered.length === 0 ? (
+          <p className="rounded-lg border border-dashed bg-muted/30 p-6 text-center text-sm text-muted-foreground">
+            No generations match your filters.
+          </p>
+        ) : null}
+
+        {filtered.map((item) => {
           const isExpanded = expandedId === item.id;
           const isPending = pendingId === item.id;
           return (
@@ -118,7 +167,8 @@ export function GenerationHistory<Input>({
               key={item.id}
               className={cn(
                 "rounded-lg border bg-background transition-colors",
-                item.is_favorite && "border-amber-400/60 bg-amber-50/40",
+                item.is_favorite &&
+                  "border-amber-400/60 bg-amber-50/40 dark:bg-amber-500/10",
                 isExpanded && "shadow-sm"
               )}
             >

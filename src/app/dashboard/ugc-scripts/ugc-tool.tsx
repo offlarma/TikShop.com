@@ -225,6 +225,7 @@ export function UgcTool({ initialHistory }: { initialHistory: Generation[] }) {
           error={error}
           emptyTitle="Your UGC script will appear here"
           emptyDescription="Fill in the form on the left and click Generate to draft a TikTok Shop UGC script."
+          exportName={values.productName || "ugc-script"}
         />
       </div>
 

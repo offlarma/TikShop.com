@@ -218,6 +218,9 @@ export function OutreachTool({
           error={error}
           emptyTitle="Your outreach message will appear here"
           emptyDescription="Tell us about your brand, the creator you're targeting, and the offer. We'll draft the message + a follow-up."
+          exportName={
+            values.brandName ? `outreach-${values.brandName}` : "outreach"
+          }
         />
       </div>
 
