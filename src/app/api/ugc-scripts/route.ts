@@ -6,13 +6,14 @@ import {
   ensureOpenAIConfigured,
   requireUser,
 } from "@/lib/api-helpers";
+import { insertGeneration } from "@/lib/db/generations";
 import { buildUgcPrompt, ugcInputSchema } from "@/lib/prompts";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 export async function POST(request: Request) {
-  const { response: authError } = await requireUser();
+  const { user, response: authError } = await requireUser();
   if (authError) return authError;
 
   const configError = ensureOpenAIConfigured();
@@ -31,12 +32,22 @@ export async function POST(request: Request) {
     return badRequest(first?.message ?? "Invalid input.");
   }
 
-  const prompt = buildUgcPrompt(parsed.data);
+  const input = parsed.data;
+  const prompt = buildUgcPrompt(input);
 
   const result = streamText({
     model: aiModel,
     prompt,
     ...generationConfig,
+    async onFinish({ text }) {
+      if (!user || !text.trim()) return;
+      await insertGeneration({
+        userId: user.id,
+        tool: "ugc-scripts",
+        input: input as unknown as Record<string, unknown>,
+        output: text,
+      });
+    },
   });
 
   return result.toTextStreamResponse();
