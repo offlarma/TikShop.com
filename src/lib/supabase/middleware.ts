@@ -37,8 +37,13 @@ export async function updateSession(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   const { pathname } = request.nextUrl;
-  const isAuthRoute = pathname.startsWith("/login") || pathname.startsWith("/signup");
+  const isAuthRoute =
+    pathname.startsWith("/login") || pathname.startsWith("/signup");
   const isProtectedRoute = pathname.startsWith("/dashboard");
+
+  // /auth/callback and /forgot-password are intentionally allowed for
+  // both signed-in and signed-out users — they handle Supabase email
+  // links + password reset requests.
 
   if (!user && isProtectedRoute) {
     const redirectUrl = request.nextUrl.clone();

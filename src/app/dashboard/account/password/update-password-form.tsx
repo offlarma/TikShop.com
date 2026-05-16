@@ -1,23 +1,22 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Loader2 } from "lucide-react";
+import { KeyRound, Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import Link from "next/link";
 
-import { signIn } from "../actions";
+import { updatePasswordAction } from "@/app/(auth)/actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-export function LoginForm() {
+export function UpdatePasswordForm() {
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
   function onSubmit(formData: FormData) {
     setError(null);
     startTransition(async () => {
-      const result = await signIn(formData);
+      const result = await updatePasswordAction(formData);
       if (result?.error) {
         setError(result.error);
         toast.error(result.error);
@@ -28,32 +27,14 @@ export function LoginForm() {
   return (
     <form action={onSubmit} className="space-y-4">
       <div className="space-y-2">
-        <Label htmlFor="email">Email</Label>
-        <Input
-          id="email"
-          name="email"
-          type="email"
-          placeholder="you@brand.com"
-          autoComplete="email"
-          required
-        />
-      </div>
-      <div className="space-y-2">
-        <div className="flex items-center justify-between">
-          <Label htmlFor="password">Password</Label>
-          <Link
-            href="/forgot-password"
-            className="text-xs text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
-          >
-            Forgot password?
-          </Link>
-        </div>
+        <Label htmlFor="password">New password</Label>
         <Input
           id="password"
           name="password"
           type="password"
-          placeholder="••••••••"
-          autoComplete="current-password"
+          placeholder="At least 6 characters"
+          autoComplete="new-password"
+          minLength={6}
           required
         />
       </div>
@@ -62,14 +43,17 @@ export function LoginForm() {
           {error}
         </p>
       ) : null}
-      <Button type="submit" className="w-full" disabled={isPending}>
+      <Button type="submit" disabled={isPending}>
         {isPending ? (
           <>
             <Loader2 className="h-4 w-4 animate-spin" />
-            Signing in...
+            Updating...
           </>
         ) : (
-          "Log in"
+          <>
+            <KeyRound className="h-4 w-4" />
+            Update password
+          </>
         )}
       </Button>
     </form>

@@ -65,3 +65,46 @@ export async function signOut() {
   revalidatePath("/", "layout");
   redirect("/login");
 }
+
+function getAppUrlFromHeaders(): string {
+  const fromEnv = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "");
+  if (fromEnv) return fromEnv;
+  return "http://localhost:3000";
+}
+
+export async function requestPasswordReset(
+  formData: FormData
+): Promise<AuthResult> {
+  const email = String(formData.get("email") ?? "").trim();
+  if (!email) return { error: "Email is required." };
+
+  const supabase = createClient();
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: `${getAppUrlFromHeaders()}/auth/callback?next=/dashboard/account/password`,
+  });
+
+  if (error) {
+    return { error: error.message };
+  }
+
+  return {
+    message:
+      "If that email is registered, a password reset link is on its way. Check your inbox.",
+  };
+}
+
+export async function updatePasswordAction(
+  formData: FormData
+): Promise<AuthResult> {
+  const password = String(formData.get("password") ?? "");
+  if (password.length < 6) {
+    return { error: "Password must be at least 6 characters." };
+  }
+
+  const supabase = createClient();
+  const { error } = await supabase.auth.updateUser({ password });
+  if (error) return { error: error.message };
+
+  revalidatePath("/", "layout");
+  redirect("/dashboard");
+}

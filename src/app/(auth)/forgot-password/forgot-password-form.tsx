@@ -1,26 +1,33 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Loader2 } from "lucide-react";
+import { Loader2, Send } from "lucide-react";
 import { toast } from "sonner";
-import Link from "next/link";
 
-import { signIn } from "../actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-export function LoginForm() {
+import { requestPasswordReset } from "../actions";
+
+export function ForgotPasswordForm() {
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
+  const [info, setInfo] = useState<string | null>(null);
 
   function onSubmit(formData: FormData) {
     setError(null);
+    setInfo(null);
     startTransition(async () => {
-      const result = await signIn(formData);
+      const result = await requestPasswordReset(formData);
       if (result?.error) {
         setError(result.error);
         toast.error(result.error);
+        return;
+      }
+      if (result?.message) {
+        setInfo(result.message);
+        toast.success(result.message);
       }
     });
   }
@@ -38,38 +45,27 @@ export function LoginForm() {
           required
         />
       </div>
-      <div className="space-y-2">
-        <div className="flex items-center justify-between">
-          <Label htmlFor="password">Password</Label>
-          <Link
-            href="/forgot-password"
-            className="text-xs text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
-          >
-            Forgot password?
-          </Link>
-        </div>
-        <Input
-          id="password"
-          name="password"
-          type="password"
-          placeholder="••••••••"
-          autoComplete="current-password"
-          required
-        />
-      </div>
       {error ? (
         <p className="text-sm text-destructive" role="alert">
           {error}
+        </p>
+      ) : null}
+      {info ? (
+        <p className="text-sm text-muted-foreground" role="status">
+          {info}
         </p>
       ) : null}
       <Button type="submit" className="w-full" disabled={isPending}>
         {isPending ? (
           <>
             <Loader2 className="h-4 w-4 animate-spin" />
-            Signing in...
+            Sending...
           </>
         ) : (
-          "Log in"
+          <>
+            <Send className="h-4 w-4" />
+            Send reset link
+          </>
         )}
       </Button>
     </form>
