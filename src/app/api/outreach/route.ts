@@ -44,8 +44,20 @@ export async function POST(request: Request) {
     model: aiModel,
     prompt,
     ...generationConfig,
-    async onFinish({ text }) {
-      if (!user || !text.trim()) return;
+    async onFinish({ text, finishReason, usage }) {
+      console.log(
+        `[outreach.onFinish] reason=${finishReason} text.length=${text.length} tokens=${usage?.totalTokens ?? "?"}`
+      );
+      if (!user) {
+        console.warn(`[outreach.onFinish] no user — skipping save`);
+        return;
+      }
+      if (!text.trim()) {
+        console.warn(
+          `[outreach.onFinish] empty output (reason=${finishReason}) — skipping save`
+        );
+        return;
+      }
       const generation = await insertGeneration({
         userId: user.id,
         tool: "outreach",
@@ -57,6 +69,12 @@ export async function POST(request: Request) {
         tool: "outreach",
         generationId: generation?.id,
       });
+      console.log(
+        `[outreach.onFinish] saved generation id=${generation?.id ?? "(null)"}`
+      );
+    },
+    onError({ error }) {
+      console.error(`[outreach.streamError]`, error);
     },
   });
 

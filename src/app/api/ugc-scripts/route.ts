@@ -44,8 +44,20 @@ export async function POST(request: Request) {
     model: aiModel,
     prompt,
     ...generationConfig,
-    async onFinish({ text }) {
-      if (!user || !text.trim()) return;
+    async onFinish({ text, finishReason, usage }) {
+      console.log(
+        `[ugc-scripts.onFinish] reason=${finishReason} text.length=${text.length} tokens=${usage?.totalTokens ?? "?"}`
+      );
+      if (!user) {
+        console.warn(`[ugc-scripts.onFinish] no user — skipping save`);
+        return;
+      }
+      if (!text.trim()) {
+        console.warn(
+          `[ugc-scripts.onFinish] empty output (reason=${finishReason}) — skipping save`
+        );
+        return;
+      }
       const generation = await insertGeneration({
         userId: user.id,
         tool: "ugc-scripts",
@@ -57,6 +69,12 @@ export async function POST(request: Request) {
         tool: "ugc-scripts",
         generationId: generation?.id,
       });
+      console.log(
+        `[ugc-scripts.onFinish] saved generation id=${generation?.id ?? "(null)"}`
+      );
+    },
+    onError({ error }) {
+      console.error(`[ugc-scripts.streamError]`, error);
     },
   });
 
