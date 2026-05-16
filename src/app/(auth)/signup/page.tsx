@@ -15,7 +15,7 @@ export default function SignupPage() {
       <CardHeader className="space-y-2 text-center">
         <CardTitle className="text-2xl">Create your account</CardTitle>
         <CardDescription>
-          Start scaling your TikTok Shop with the Growth Suite toolkit.
+          Start scaling your TikTok Shop with TikShopDrop.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">

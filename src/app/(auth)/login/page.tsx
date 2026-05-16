@@ -15,7 +15,7 @@ export default function LoginPage() {
       <CardHeader className="space-y-2 text-center">
         <CardTitle className="text-2xl">Welcome back</CardTitle>
         <CardDescription>
-          Log in to your Growth Suite account to keep scaling your TikTok Shop.
+          Log in to your TikShopDrop account to keep scaling your TikTok Shop.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">

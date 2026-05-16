@@ -6,11 +6,11 @@ import {
   CreditCard,
   LayoutDashboard,
   Megaphone,
-  Sparkles,
   Users,
   Wand2,
 } from "lucide-react";
 
+import { Brand } from "@/components/landing/brand";
 import { cn } from "@/lib/utils";
 
 type NavItem = {
@@ -30,13 +30,8 @@ const navItems: NavItem[] = [
 
 export function DashboardSidebarBrand() {
   return (
-    <div className="flex h-16 items-center gap-2 border-b px-6">
-      <span className="flex h-8 w-8 items-center justify-center rounded-md bg-primary text-primary-foreground">
-        <Sparkles className="h-4 w-4" />
-      </span>
-      <span className="text-base font-semibold tracking-tight">
-        Growth Suite
-      </span>
+    <div className="flex h-16 items-center border-b px-6">
+      <Brand size="md" href="/dashboard" />
     </div>
   );
 }
@@ -78,7 +73,7 @@ export function DashboardNavLinks({
 export function DashboardSidebarFooter() {
   return (
     <div className="border-t p-4 text-xs text-muted-foreground">
-      <p className="font-medium text-foreground">TikTok Shop Suite</p>
+      <p className="font-medium text-foreground">TikShopDrop</p>
       <p>MVP · v0.1</p>
     </div>
   );

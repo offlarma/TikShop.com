@@ -11,7 +11,6 @@ interface Feature {
   title: string;
   description: string;
   bullets: string[];
-  span?: string;
 }
 
 const FEATURES: Feature[] = [
@@ -26,7 +25,6 @@ const FEATURES: Feature[] = [
       "Tone-tuned to your brand voice",
       "On-screen text suggestions ready to paste",
     ],
-    span: "md:col-span-2",
   },
   {
     icon: Users,
@@ -77,9 +75,9 @@ export function LandingFeatures() {
           </FadeUp>
         </div>
 
-        <StaggerGroup className="mt-14 grid gap-4 md:grid-cols-3 md:gap-6">
+        <StaggerGroup className="mt-14 grid auto-rows-fr gap-4 md:grid-cols-3 md:gap-6">
           {FEATURES.map((feature) => (
-            <StaggerItem key={feature.title} className={feature.span}>
+            <StaggerItem key={feature.title} className="h-full">
               <FeatureCard feature={feature} />
             </StaggerItem>
           ))}

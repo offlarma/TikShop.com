@@ -39,7 +39,7 @@ export default function DashboardPage() {
       <div className="space-y-2">
         <h1 className="text-3xl font-semibold tracking-tight">Dashboard</h1>
         <p className="text-muted-foreground">
-          Welcome to Growth Suite. Pick a tool to get started.
+          Welcome to TikShopDrop. Pick a tool to get started.
         </p>
       </div>
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">

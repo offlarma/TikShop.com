@@ -36,7 +36,7 @@ export function MobileSidebar() {
       <SheetContent side="left" className="flex w-72 flex-col gap-0 p-0">
         <SheetTitle className="sr-only">Navigation</SheetTitle>
         <SheetDescription className="sr-only">
-          Switch between Growth Suite tools.
+          Switch between TikShopDrop tools.
         </SheetDescription>
         <DashboardSidebarBrand />
         <DashboardNavLinks onNavigate={() => setOpen(false)} />

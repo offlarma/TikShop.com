@@ -14,7 +14,7 @@ export default function UpdatePasswordPage() {
       <div className="space-y-2">
         <h1 className="text-3xl font-semibold tracking-tight">Set a new password</h1>
         <p className="text-muted-foreground">
-          Choose a new password for your Growth Suite account.
+          Choose a new password for your TikShopDrop account.
         </p>
       </div>
       <Card className="max-w-md">
