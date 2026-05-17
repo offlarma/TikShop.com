@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 
+import { validateEmail } from "@/lib/email-validation";
 import { createClient } from "@/lib/supabase/server";
 
 export type AuthResult = {
@@ -11,15 +12,23 @@ export type AuthResult = {
 };
 
 export async function signIn(formData: FormData): Promise<AuthResult> {
-  const email = String(formData.get("email") ?? "").trim();
+  const rawEmail = String(formData.get("email") ?? "");
   const password = String(formData.get("password") ?? "");
 
-  if (!email || !password) {
-    return { error: "Email and password are required." };
+  if (!password) {
+    return { error: "Password is required." };
+  }
+
+  const emailCheck = validateEmail(rawEmail);
+  if (!emailCheck.ok) {
+    return { error: emailCheck.reason };
   }
 
   const supabase = await createClient();
-  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  const { error } = await supabase.auth.signInWithPassword({
+    email: emailCheck.email,
+    password,
+  });
 
   if (error) {
     return { error: error.message };
@@ -30,19 +39,26 @@ export async function signIn(formData: FormData): Promise<AuthResult> {
 }
 
 export async function signUp(formData: FormData): Promise<AuthResult> {
-  const email = String(formData.get("email") ?? "").trim();
+  const rawEmail = String(formData.get("email") ?? "");
   const password = String(formData.get("password") ?? "");
 
-  if (!email || !password) {
-    return { error: "Email and password are required." };
+  if (!password) {
+    return { error: "Password is required." };
   }
-
   if (password.length < 6) {
     return { error: "Password must be at least 6 characters." };
   }
 
+  const emailCheck = validateEmail(rawEmail);
+  if (!emailCheck.ok) {
+    return { error: emailCheck.reason };
+  }
+
   const supabase = await createClient();
-  const { data, error } = await supabase.auth.signUp({ email, password });
+  const { data, error } = await supabase.auth.signUp({
+    email: emailCheck.email,
+    password,
+  });
 
   if (error) {
     return { error: error.message };
@@ -75,11 +91,14 @@ function getAppUrlFromHeaders(): string {
 export async function requestPasswordReset(
   formData: FormData
 ): Promise<AuthResult> {
-  const email = String(formData.get("email") ?? "").trim();
-  if (!email) return { error: "Email is required." };
+  const rawEmail = String(formData.get("email") ?? "");
+  const emailCheck = validateEmail(rawEmail);
+  if (!emailCheck.ok) {
+    return { error: emailCheck.reason };
+  }
 
   const supabase = await createClient();
-  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+  const { error } = await supabase.auth.resetPasswordForEmail(emailCheck.email, {
     redirectTo: `${getAppUrlFromHeaders()}/auth/callback?next=/dashboard/account/password`,
   });
 

@@ -1,6 +1,8 @@
 import Link from "next/link";
 
 import { LoginForm } from "./login-form";
+import { LoginErrorToast } from "./login-error-toast";
+import { GoogleButton, OrSeparator } from "../google-button";
 import {
   Card,
   CardContent,
@@ -9,7 +11,13 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
-export default function LoginPage() {
+export default async function LoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ error?: string }>;
+}) {
+  const { error } = await searchParams;
+
   return (
     <Card className="border-border/60 shadow-lg">
       <CardHeader className="space-y-2 text-center">
@@ -19,6 +27,9 @@ export default function LoginPage() {
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
+        <LoginErrorToast message={error} />
+        <GoogleButton label="Continue with Google" />
+        <OrSeparator />
         <LoginForm />
         <p className="text-center text-sm text-muted-foreground">
           Don&apos;t have an account?{" "}
