@@ -5,20 +5,20 @@ import { createClient } from "@/lib/supabase/server";
 import { LandingPage } from "@/components/landing";
 
 export const metadata: Metadata = {
-  title: "TikShopDrop — Scale your TikTok Shop with AI",
+  title: "TikShopDrop — AI toolkit for TikTok Shop sellers",
   description:
-    "TikShopDrop is the 3-in-1 AI growth suite for TikTok Shop sellers: UGC scripts, affiliate outreach and copy optimization.",
+    "TikShopDrop is an independent AI toolkit for TikTok Shop sellers: UGC script generation, affiliate outreach drafts, copy optimization, listing compliance scanning, creator matching and a margin calculator. Not affiliated with TikTok Inc.",
   openGraph: {
-    title: "TikShopDrop — Scale your TikTok Shop with AI",
+    title: "TikShopDrop — AI toolkit for TikTok Shop sellers",
     description:
-      "The 3-in-1 AI growth suite for TikTok Shop sellers. Generate viral UGC scripts, recruit affiliates and optimize copy in seconds.",
+      "Independent AI toolkit for TikTok Shop sellers: UGC scripts, affiliate outreach drafts, copy optimization, listing compliance scanning and more.",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "TikShopDrop — Scale your TikTok Shop with AI",
+    title: "TikShopDrop — AI toolkit for TikTok Shop sellers",
     description:
-      "The 3-in-1 AI growth suite for TikTok Shop sellers.",
+      "Independent AI toolkit for TikTok Shop sellers. Not affiliated with TikTok Inc.",
   },
 };
 

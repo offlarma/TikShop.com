@@ -13,13 +13,13 @@ export function LandingCta() {
       <div className="mx-auto w-full max-w-3xl px-4 text-center sm:px-6">
         <FadeUp>
           <h2 className="text-balance text-3xl font-semibold tracking-tight sm:text-4xl">
-            Your next viral product launch starts today.
+            Start drafting your next product launch.
           </h2>
         </FadeUp>
         <FadeUp delay={0.08}>
           <p className="mt-4 text-pretty text-muted-foreground">
-            Join thousands of TikTok Shop sellers using TikShopDrop to ship
-            content, recruit creators, and optimize copy in minutes.
+            Use TikShopDrop to draft content, recruit creators and optimize
+            copy in minutes, from a single dashboard.
           </p>
         </FadeUp>
         <FadeUp delay={0.16}>

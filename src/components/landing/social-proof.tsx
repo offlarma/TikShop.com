@@ -26,7 +26,7 @@ export function LandingSocialProof() {
       <div className="mx-auto w-full max-w-6xl px-4 sm:px-6">
         <FadeUp>
           <p className="mb-8 text-center text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
-            Trusted by 10,000+ top TikTok sellers
+            Built for TikTok Shop sellers in
           </p>
         </FadeUp>
 
