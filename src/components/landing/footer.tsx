@@ -3,15 +3,15 @@ import Link from "next/link";
 import { Brand } from "./brand";
 
 const productLinks = [
-  { label: "Features", href: "#features" },
-  { label: "Pricing", href: "#pricing" },
+  { label: "Features", href: "/#features" },
+  { label: "Pricing", href: "/#pricing" },
   { label: "Log in", href: "/login" },
   { label: "Start for Free", href: "/signup" },
 ];
 
 const companyLinks = [
-  { label: "Privacy", href: "#" },
-  { label: "Terms", href: "#" },
+  { label: "Privacy", href: "/privacy" },
+  { label: "Terms", href: "/terms" },
   { label: "Contact", href: "mailto:hello@tikshopdrop.com" },
 ];
 

@@ -2,16 +2,22 @@
 
 import { FadeUp } from "./motion-primitives";
 
-// Minimalist wordmarks rendered as type — keeps the page light (no images)
-// and stays sharp on retina. Names are intentionally generic placeholders
-// for early-stage social proof.
-const LOGOS = [
-  { name: "Lunaria", style: "font-serif" },
-  { name: "Northpeak", style: "font-semibold tracking-tight" },
-  { name: "OBSIDIAN", style: "font-bold tracking-[0.2em] text-sm" },
-  { name: "drift//", style: "font-mono" },
-  { name: "Mosaic Co.", style: "italic font-medium" },
-  { name: "Halo Labs", style: "font-semibold" },
+const CATEGORIES = [
+  "Skincare",
+  "Beauty",
+  "Supplements",
+  "Wellness",
+  "Fashion",
+  "Apparel",
+  "Electronics",
+  "Tech accessories",
+  "Food & Beverage",
+  "Home & Living",
+  "Fitness",
+  "Sports",
+  "Pet care",
+  "Baby & Kids",
+  "Lifestyle",
 ];
 
 export function LandingSocialProof() {
@@ -25,19 +31,28 @@ export function LandingSocialProof() {
         </FadeUp>
 
         <FadeUp delay={0.1}>
-          <ul
-            className="grid grid-cols-2 items-center gap-x-8 gap-y-6 opacity-70 grayscale sm:grid-cols-3 md:grid-cols-6"
-            aria-label="Brands using TikShopDrop"
+          <div
+            className="relative overflow-hidden py-2"
+            aria-label={`Categories served: ${CATEGORIES.join(", ")}`}
           >
-            {LOGOS.map((logo) => (
-              <li
-                key={logo.name}
-                className={`flex select-none items-center justify-center text-lg text-muted-foreground/80 transition-opacity hover:opacity-100 ${logo.style}`}
-              >
-                {logo.name}
-              </li>
-            ))}
-          </ul>
+            {/* Fade edges so categories appear and disappear smoothly */}
+            <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-20 bg-gradient-to-r from-muted/30 to-transparent" />
+            <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-20 bg-gradient-to-l from-muted/30 to-transparent" />
+
+            <div
+              className="flex w-max gap-3 animate-marquee hover:[animation-play-state:paused] motion-reduce:animate-none motion-reduce:flex-wrap motion-reduce:justify-center"
+              aria-hidden="true"
+            >
+              {[...CATEGORIES, ...CATEGORIES].map((cat, i) => (
+                <span
+                  key={`${cat}-${i}`}
+                  className="inline-flex select-none items-center whitespace-nowrap rounded-full border border-border/60 bg-background/60 px-4 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+                >
+                  {cat}
+                </span>
+              ))}
+            </div>
+          </div>
         </FadeUp>
       </div>
     </section>

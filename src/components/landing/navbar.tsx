@@ -9,8 +9,8 @@ import { cn } from "@/lib/utils";
 import { Brand } from "./brand";
 
 const links = [
-  { label: "Features", href: "#features" },
-  { label: "Pricing", href: "#pricing" },
+  { label: "Features", href: "/#features" },
+  { label: "Pricing", href: "/#pricing" },
 ];
 
 export function LandingNavbar() {
