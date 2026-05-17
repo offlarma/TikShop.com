@@ -17,7 +17,7 @@ export type MutationResult =
 async function requireAuth(): Promise<
   { ok: true; userId: string } | { ok: false; error: string }
 > {
-  const supabase = createClient();
+  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();

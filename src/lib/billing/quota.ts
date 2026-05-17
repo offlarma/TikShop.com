@@ -1,8 +1,14 @@
 import "server-only";
 
+import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { getPlanConfig } from "@/lib/billing/plans";
-import type { Plan, Subscription, SubscriptionStatus } from "@/types/db";
+import type {
+  Plan,
+  Subscription,
+  SubscriptionStatus,
+  Tool,
+} from "@/types/db";
 
 /** Statuses that should *not* grant access to the paid plan benefits. */
 const INACTIVE_STATUSES: SubscriptionStatus[] = [
@@ -34,7 +40,7 @@ function startOfNextMonthUTC(): Date {
 export async function getSubscription(
   userId: string
 ): Promise<Subscription | null> {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data, error } = await supabase
     .from("subscriptions")
     .select("*")
@@ -49,7 +55,7 @@ export async function getSubscription(
 }
 
 export async function countMonthlyUsage(userId: string): Promise<number> {
-  const supabase = createClient();
+  const supabase = await createClient();
   const since = startOfCurrentMonthUTC().toISOString();
   const { count, error } = await supabase
     .from("usage_events")
@@ -111,10 +117,24 @@ export async function checkQuota(userId: string): Promise<QuotaCheckResult> {
 
 export async function recordUsageEvent(params: {
   userId: string;
-  tool: "ugc-scripts" | "outreach" | "copy-optimizer";
+  tool: Tool;
   generationId?: string | null;
 }): Promise<void> {
-  const supabase = createClient();
+  // Same reasoning as insertGeneration: this is called from streamText's
+  // onFinish callback after the request-scoped cookie context has been
+  // torn down. Use the admin client so RLS doesn't silently reject the
+  // insert. params.userId was already validated by requireUser().
+  let supabase;
+  try {
+    supabase = createAdminClient();
+  } catch (err) {
+    console.error(
+      "[quota.recordUsageEvent] SUPABASE_SERVICE_ROLE_KEY is required to track usage.",
+      err
+    );
+    return;
+  }
+
   const { error } = await supabase.from("usage_events").insert({
     user_id: params.userId,
     tool: params.tool,

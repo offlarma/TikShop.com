@@ -1,6 +1,6 @@
-# TikTok Shop Growth Suite
+# TikShopDrop
 
-A 3-in-1 SaaS application for TikTok Shop sellers. The Growth Suite ships with three AI-powered tools:
+A 3-in-1 SaaS application for TikTok Shop sellers. TikShopDrop ships with three AI-powered tools:
 
 1. **UGC Script Generator** — generates scroll-stopping UGC scripts tailored to your product.
 2. **Affiliate Outreach** — drafts personalized DMs and emails to recruit affiliates and creators.

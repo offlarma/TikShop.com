@@ -126,6 +126,318 @@ Constraints:
 - Do not invent product features that were not provided.`;
 }
 
+// ---------- Violation Appeals ----------
+
+export const appealInputSchema = z.object({
+  violationType: z
+    .enum([
+      "Counterfeit / IP claim",
+      "Misleading content",
+      "Product safety",
+      "Listing policy",
+      "Pricing / discount policy",
+      "Shipping / fulfillment",
+      "Account integrity",
+      "Other",
+    ])
+    .default("Other"),
+  affectedAsset: z
+    .string()
+    .trim()
+    .min(2, "Tell us which product / listing / account was affected.")
+    .max(200),
+  whatHappened: z
+    .string()
+    .trim()
+    .min(20, "Describe what happened in at least 20 characters.")
+    .max(2000),
+  evidence: z.string().trim().max(2000).optional().default(""),
+  desiredOutcome: z
+    .enum([
+      "Restore the listing",
+      "Restore the account",
+      "Remove the warning / strike",
+      "Reinstate eligibility for promotions",
+      "Other",
+    ])
+    .default("Restore the listing"),
+  tone: z
+    .enum(["Professional", "Firm but respectful", "Apologetic", "Concise"])
+    .default("Professional"),
+});
+
+export type AppealInput = z.infer<typeof appealInputSchema>;
+
+export function buildAppealPrompt(input: AppealInput) {
+  const evidence = input.evidence
+    ? input.evidence
+    : "(no additional evidence provided — work from the facts above)";
+
+  return `You are a senior TikTok Shop seller compliance specialist. Draft a
+formal appeal to TikTok Shop seller support for the case below.
+
+Violation type: ${input.violationType}
+Affected listing / product / account: ${input.affectedAsset}
+What happened (seller's account):
+"""
+${input.whatHappened}
+"""
+
+Supporting evidence:
+${evidence}
+
+Desired outcome: ${input.desiredOutcome}
+Tone: ${input.tone}
+
+Format the answer in Markdown with EXACTLY these sections:
+## Subject
+One concise subject line (≤ 80 chars) referencing the case.
+## Appeal letter
+The full appeal body, structured as four short paragraphs:
+1) Acknowledge the violation notice and reference the specific listing/account.
+2) Clearly state the facts and why the original decision should be reconsidered.
+3) Cite the supporting evidence (or the absence of any policy breach).
+4) State the desired outcome and offer to provide further information.
+## Evidence checklist
+A short bullet list (3-6 items) of documents / screenshots the seller
+should attach when sending the appeal.
+
+Constraints:
+- Strictly English.
+- Do not invent evidence or certifications that were not provided.
+- Reference TikTok Shop policy categories generically (no fabricated URLs).
+- Never threaten legal action or use aggressive language.
+- Keep the appeal body under 300 words.`;
+}
+
+// ---------- Violation Scanner ----------
+
+export const SCAN_CATEGORIES = [
+  "Skincare & Beauty",
+  "Supplements & Health",
+  "Electronics & Tech",
+  "Fashion & Apparel",
+  "Food & Beverage",
+  "Home & Living",
+  "Baby & Kids",
+  "Sports & Fitness",
+  "Adult Wellness",
+  "Other",
+] as const;
+
+export const violationScannerInputSchema = z.object({
+  productTitle: z
+    .string()
+    .trim()
+    .min(2, "Add the product title (at least 2 characters).")
+    .max(200),
+  productDescription: z
+    .string()
+    .trim()
+    .min(20, "Paste the full product description (at least 20 characters).")
+    .max(3000),
+  keyClaims: z.string().trim().max(1500).optional().default(""),
+  category: z.enum(SCAN_CATEGORIES).default("Other"),
+  targetMarket: z
+    .string()
+    .trim()
+    .max(200)
+    .optional()
+    .default("United States"),
+  imageContext: z.string().trim().max(1000).optional().default(""),
+  sensitivity: z
+    .enum(["Lenient", "Standard", "Strict"])
+    .default("Standard"),
+});
+
+export type ViolationScannerInput = z.infer<
+  typeof violationScannerInputSchema
+>;
+
+export function buildViolationScannerPrompt(input: ViolationScannerInput) {
+  const claims = input.keyClaims
+    ? input.keyClaims
+    : "(no explicit claims listed — infer from the description)";
+  const imageContext = input.imageContext
+    ? input.imageContext
+    : "(no image context provided)";
+  const market = input.targetMarket || "United States";
+
+  const sensitivityRules =
+    input.sensitivity === "Strict"
+      ? "Be PARANOID. Flag even borderline phrasings and ambiguous claims. Lower the bar for what counts as a 🟡 warning."
+      : input.sensitivity === "Lenient"
+        ? "Only flag clear and likely violations. Skip stylistic nitpicks. Use 🟡 warnings sparingly."
+        : "Be balanced: flag clear violations as 🔴, plausible risks as 🟡, ignore stylistic nitpicks.";
+
+  return `You are a senior TikTok Shop policy compliance reviewer. Audit the
+product listing below and surface every likely policy violation BEFORE
+the seller publishes it.
+
+Category: ${input.category}
+Target market: ${market}
+Review sensitivity: ${input.sensitivity}
+${sensitivityRules}
+
+Listing under review:
+"""
+Title: ${input.productTitle}
+
+Description:
+${input.productDescription}
+
+Key claims / bullet points:
+${claims}
+
+Image context (described by seller):
+${imageContext}
+"""
+
+Policy areas to consider (NON exhaustive — apply judgement):
+- Counterfeit / intellectual property / trademark claims
+- Medical, therapeutic, drug or disease claims ("cures", "treats", "prevents")
+- Misleading / unsubstantiated performance claims ("guaranteed", "100% effective")
+- Before / after content (especially body, skin, weight)
+- Restricted ingredients (e.g. hydroquinone, retinoids in some markets, CBD/THC)
+- Regulated categories (supplements, sexual wellness, weapons accessories, alcohol, tobacco)
+- Age-gated content
+- Hate speech / discriminatory language
+- Endangered species, ivory, fur from protected animals
+- Live animals, hazardous materials
+- Financial scams, get-rich-quick framing
+- Privacy / personal data claims
+- Unverified certifications ("FDA approved", "clinically proven")
+- Pricing / discount / scarcity manipulation ("only 2 left!" without basis)
+
+Format the answer in Markdown with EXACTLY these top-level sections.
+Use this OUTPUT TEMPLATE verbatim:
+
+## Overall risk: <Low | Medium | High>
+One sentence justifying the score.
+
+## Issues found (<N>)
+For each issue use a third-level heading like:
+### 🔴 Hard violation — <short title>
+(or "### 🟡 Warning — <short title>")
+- **Where**: short quote from the listing
+- **Policy area**: <category name>
+- **Why it's risky**: 1 line
+- **Suggested fix**: 1 line, concrete and copy-pasteable
+
+If there are zero issues, write a single line: "No clear violations detected at this sensitivity level."
+
+## Policy areas checked
+A bulleted list of the policy areas you actually evaluated (so the seller knows coverage). Use the names from the list above.
+
+## Suggested safer rewrite
+### Title
+A policy-safe rewrite of the product title (≤ 80 chars).
+### Description
+A policy-safe rewrite of the product description, preserving the same selling points but removing risky claims (60-180 words).
+
+## Disclaimer
+Two sentences: this is an AI estimation based on commonly enforced TikTok Shop policies, not a guarantee. Always verify against the current TikTok Shop Seller Center guidelines for ${market}.
+
+Hard constraints:
+- Strictly English.
+- Do NOT invent specific TikTok Shop policy URLs or document numbers.
+- Quote the seller's exact words when flagging an issue.
+- Never accuse the seller of intent — describe the listing, not the person.
+- If a claim could be substantiated with documentation, say so in the fix.`;
+}
+
+// ---------- Creator Matcher ----------
+
+export const creatorMatcherInputSchema = z.object({
+  productDescription: z
+    .string()
+    .trim()
+    .min(10, "Describe the product in at least 10 characters.")
+    .max(1500),
+  targetAudience: z
+    .string()
+    .trim()
+    .min(2, "Tell us who the product is for.")
+    .max(200),
+  budgetRange: z
+    .enum([
+      "Affiliate / commission only",
+      "Under $100 per creator",
+      "$100 - $500 per creator",
+      "$500 - $2,000 per creator",
+      "$2,000+ per creator",
+    ])
+    .default("Affiliate / commission only"),
+  creatorTier: z
+    .enum([
+      "Nano (1k - 10k followers)",
+      "Micro (10k - 100k followers)",
+      "Mid (100k - 500k followers)",
+      "Macro (500k+ followers)",
+      "Any",
+    ])
+    .default("Micro (10k - 100k followers)"),
+  contentStyle: z
+    .string()
+    .trim()
+    .max(300)
+    .optional()
+    .default(""),
+  geography: z
+    .string()
+    .trim()
+    .max(200)
+    .optional()
+    .default("United States"),
+});
+
+export type CreatorMatcherInput = z.infer<typeof creatorMatcherInputSchema>;
+
+export function buildCreatorMatcherPrompt(input: CreatorMatcherInput) {
+  const contentStyle = input.contentStyle
+    ? input.contentStyle
+    : "no specific style preference — suggest a sensible default for the product";
+  const geo = input.geography || "United States";
+
+  return `You are a TikTok Shop creator-marketing strategist. Produce a
+shortlist of 5 distinct TikTok creator personas to target for the brand
+below. Do NOT invent real handles or usernames — describe archetypes the
+seller can search for.
+
+Product description:
+"""
+${input.productDescription}
+"""
+
+Target audience: ${input.targetAudience}
+Budget per creator: ${input.budgetRange}
+Creator tier: ${input.creatorTier}
+Content style preference: ${contentStyle}
+Geography: ${geo}
+
+Format the answer in Markdown with EXACTLY these sections:
+## Why this product needs creator marketing
+A 1-2 sentence positioning summary.
+## 5 creator personas to target
+For each persona use a third-level heading "### Persona N — <short label>"
+and include these bullets:
+- **Niche & content type**: ...
+- **Typical follower range**: ...
+- **Why they fit**: 1 sentence
+- **Where to find them**: TikTok search query or hashtags to try
+- **Outreach angle**: 1 line, what to lead with in the DM
+- **Red flags to avoid**: 1 short line
+## Suggested next 7-day outreach plan
+A bulleted list (5-7 bullets) of concrete actions for the seller this
+week (e.g. "Send 20 DMs to Persona 1 with this angle...").
+
+Constraints:
+- Strictly English.
+- Five personas, each clearly distinct in angle / audience.
+- Do not invent real TikTok handles or follower counts. Use ranges only.
+- Be specific to the product and audience above — no generic advice.`;
+}
+
 // ---------- Copy Optimizer ----------
 
 export const copyOptimizerInputSchema = z.object({

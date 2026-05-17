@@ -9,9 +9,12 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Growth Suite | TikTok Shop Growth Suite",
+  title: {
+    default: "TikShopDrop — Scale your TikTok Shop with AI",
+    template: "%s · TikShopDrop",
+  },
   description:
-    "A 3-in-1 growth toolkit for TikTok Shop sellers: UGC scripts, affiliate outreach, and copy optimization.",
+    "TikShopDrop is the 3-in-1 AI growth suite for TikTok Shop sellers: UGC scripts, affiliate outreach, and copy optimization.",
 };
 
 export default function RootLayout({

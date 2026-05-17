@@ -16,7 +16,7 @@ export default function ForgotPasswordPage() {
       <CardHeader className="space-y-2 text-center">
         <CardTitle className="text-2xl">Reset your password</CardTitle>
         <CardDescription>
-          Enter the email associated with your Growth Suite account and we will
+          Enter the email associated with your TikShopDrop account and we will
           send you a reset link.
         </CardDescription>
       </CardHeader>

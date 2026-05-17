@@ -25,15 +25,16 @@ export const dynamic = "force-dynamic";
 export default async function BillingPage({
   searchParams,
 }: {
-  searchParams: { status?: string };
+  searchParams: Promise<{ status?: string }>;
 }) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  const [snapshot, subscription] = await Promise.all([
+  const [{ status }, snapshot, subscription] = await Promise.all([
+    searchParams,
     getUsageSnapshot(user.id),
     getSubscription(user.id),
   ]);
@@ -45,7 +46,7 @@ export default async function BillingPage({
   return (
     <div className="space-y-8">
       <Suspense fallback={null}>
-        <CheckoutStatusToast status={searchParams.status} />
+        <CheckoutStatusToast status={status} />
       </Suspense>
 
       <div className="space-y-2">

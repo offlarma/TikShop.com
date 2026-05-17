@@ -1,10 +1,20 @@
-export const TOOLS = ["ugc-scripts", "outreach", "copy-optimizer"] as const;
+export const TOOLS = [
+  "ugc-scripts",
+  "outreach",
+  "copy-optimizer",
+  "appeals",
+  "creator-matcher",
+  "violation-scanner",
+] as const;
 export type Tool = (typeof TOOLS)[number];
 
 export const TOOL_LABELS: Record<Tool, string> = {
   "ugc-scripts": "UGC Script Generator",
   outreach: "Affiliate Outreach",
   "copy-optimizer": "Copy Optimizer",
+  appeals: "Violation Appeals",
+  "creator-matcher": "Creator Matcher",
+  "violation-scanner": "Violation Scanner",
 };
 
 export type Generation = {

@@ -11,6 +11,9 @@ export function ThemeToggle() {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    // Intentional mount detection to avoid SSR/CSR theme mismatch flicker —
+    // matches the pattern recommended by next-themes.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
   }, []);
 

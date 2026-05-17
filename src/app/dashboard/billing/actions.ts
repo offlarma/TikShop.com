@@ -10,7 +10,7 @@ import { createClient } from "@/lib/supabase/server";
 import type { Plan } from "@/types/db";
 
 async function requireUserOrThrow() {
-  const supabase = createClient();
+  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
