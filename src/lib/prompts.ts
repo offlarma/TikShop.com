@@ -210,6 +210,142 @@ Constraints:
 - Keep the appeal body under 300 words.`;
 }
 
+// ---------- Violation Scanner ----------
+
+export const SCAN_CATEGORIES = [
+  "Skincare & Beauty",
+  "Supplements & Health",
+  "Electronics & Tech",
+  "Fashion & Apparel",
+  "Food & Beverage",
+  "Home & Living",
+  "Baby & Kids",
+  "Sports & Fitness",
+  "Adult Wellness",
+  "Other",
+] as const;
+
+export const violationScannerInputSchema = z.object({
+  productTitle: z
+    .string()
+    .trim()
+    .min(2, "Add the product title (at least 2 characters).")
+    .max(200),
+  productDescription: z
+    .string()
+    .trim()
+    .min(20, "Paste the full product description (at least 20 characters).")
+    .max(3000),
+  keyClaims: z.string().trim().max(1500).optional().default(""),
+  category: z.enum(SCAN_CATEGORIES).default("Other"),
+  targetMarket: z
+    .string()
+    .trim()
+    .max(200)
+    .optional()
+    .default("United States"),
+  imageContext: z.string().trim().max(1000).optional().default(""),
+  sensitivity: z
+    .enum(["Lenient", "Standard", "Strict"])
+    .default("Standard"),
+});
+
+export type ViolationScannerInput = z.infer<
+  typeof violationScannerInputSchema
+>;
+
+export function buildViolationScannerPrompt(input: ViolationScannerInput) {
+  const claims = input.keyClaims
+    ? input.keyClaims
+    : "(no explicit claims listed — infer from the description)";
+  const imageContext = input.imageContext
+    ? input.imageContext
+    : "(no image context provided)";
+  const market = input.targetMarket || "United States";
+
+  const sensitivityRules =
+    input.sensitivity === "Strict"
+      ? "Be PARANOID. Flag even borderline phrasings and ambiguous claims. Lower the bar for what counts as a 🟡 warning."
+      : input.sensitivity === "Lenient"
+        ? "Only flag clear and likely violations. Skip stylistic nitpicks. Use 🟡 warnings sparingly."
+        : "Be balanced: flag clear violations as 🔴, plausible risks as 🟡, ignore stylistic nitpicks.";
+
+  return `You are a senior TikTok Shop policy compliance reviewer. Audit the
+product listing below and surface every likely policy violation BEFORE
+the seller publishes it.
+
+Category: ${input.category}
+Target market: ${market}
+Review sensitivity: ${input.sensitivity}
+${sensitivityRules}
+
+Listing under review:
+"""
+Title: ${input.productTitle}
+
+Description:
+${input.productDescription}
+
+Key claims / bullet points:
+${claims}
+
+Image context (described by seller):
+${imageContext}
+"""
+
+Policy areas to consider (NON exhaustive — apply judgement):
+- Counterfeit / intellectual property / trademark claims
+- Medical, therapeutic, drug or disease claims ("cures", "treats", "prevents")
+- Misleading / unsubstantiated performance claims ("guaranteed", "100% effective")
+- Before / after content (especially body, skin, weight)
+- Restricted ingredients (e.g. hydroquinone, retinoids in some markets, CBD/THC)
+- Regulated categories (supplements, sexual wellness, weapons accessories, alcohol, tobacco)
+- Age-gated content
+- Hate speech / discriminatory language
+- Endangered species, ivory, fur from protected animals
+- Live animals, hazardous materials
+- Financial scams, get-rich-quick framing
+- Privacy / personal data claims
+- Unverified certifications ("FDA approved", "clinically proven")
+- Pricing / discount / scarcity manipulation ("only 2 left!" without basis)
+
+Format the answer in Markdown with EXACTLY these top-level sections.
+Use this OUTPUT TEMPLATE verbatim:
+
+## Overall risk: <Low | Medium | High>
+One sentence justifying the score.
+
+## Issues found (<N>)
+For each issue use a third-level heading like:
+### 🔴 Hard violation — <short title>
+(or "### 🟡 Warning — <short title>")
+- **Where**: short quote from the listing
+- **Policy area**: <category name>
+- **Why it's risky**: 1 line
+- **Suggested fix**: 1 line, concrete and copy-pasteable
+
+If there are zero issues, write a single line: "No clear violations detected at this sensitivity level."
+
+## Policy areas checked
+A bulleted list of the policy areas you actually evaluated (so the seller knows coverage). Use the names from the list above.
+
+## Suggested safer rewrite
+### Title
+A policy-safe rewrite of the product title (≤ 80 chars).
+### Description
+A policy-safe rewrite of the product description, preserving the same selling points but removing risky claims (60-180 words).
+
+## Disclaimer
+Two sentences: this is an AI estimation based on commonly enforced TikTok Shop policies, not a guarantee. Always verify against the current TikTok Shop Seller Center guidelines for ${market}.
+
+Hard constraints:
+- Strictly English.
+- Do NOT invent specific TikTok Shop policy URLs or document numbers.
+- Quote the seller's exact words when flagging an issue.
+- Never accuse the seller of intent — describe the listing, not the person.
+- If a claim could be substantiated with documentation, say so in the fix.`;
+}
+
 // ---------- Creator Matcher ----------
 
 export const creatorMatcherInputSchema = z.object({

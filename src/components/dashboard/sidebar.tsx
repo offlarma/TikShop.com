@@ -8,6 +8,7 @@ import {
   LayoutDashboard,
   Megaphone,
   Radar,
+  ScanSearch,
   ShieldAlert,
   Users,
   Wand2,
@@ -52,6 +53,7 @@ const sections: NavSection[] = [
   {
     label: "Store Operations",
     items: [
+      { label: "Violation Scanner", href: "/dashboard/violation-scanner", icon: ScanSearch },
       { label: "Violation Appeals", href: "/dashboard/appeals", icon: ShieldAlert },
       { label: "Creator Matcher", href: "/dashboard/creator-matcher", icon: Radar },
       { label: "Margin Calculator", href: "/dashboard/calculator", icon: Calculator },

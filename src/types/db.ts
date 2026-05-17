@@ -4,6 +4,7 @@ export const TOOLS = [
   "copy-optimizer",
   "appeals",
   "creator-matcher",
+  "violation-scanner",
 ] as const;
 export type Tool = (typeof TOOLS)[number];
 
@@ -13,6 +14,7 @@ export const TOOL_LABELS: Record<Tool, string> = {
   "copy-optimizer": "Copy Optimizer",
   appeals: "Violation Appeals",
   "creator-matcher": "Creator Matcher",
+  "violation-scanner": "Violation Scanner",
 };
 
 export type Generation = {

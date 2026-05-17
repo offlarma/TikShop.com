@@ -4,6 +4,7 @@ import {
   Calculator,
   Megaphone,
   Radar,
+  ScanSearch,
   ShieldAlert,
   Users,
   Wand2,
@@ -67,6 +68,14 @@ const sections: ToolSection[] = [
     label: "Store Operations",
     description: "Operational helpers for running your shop day-to-day.",
     tools: [
+      {
+        title: "Violation Scanner",
+        description:
+          "Audit a listing before publishing — catch risky claims and get a policy-safe rewrite.",
+        href: "/dashboard/violation-scanner",
+        icon: ScanSearch,
+        status: "live",
+      },
       {
         title: "Violation Appeals",
         description:
