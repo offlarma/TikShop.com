@@ -73,7 +73,7 @@ const sections: ToolSection[] = [
           "Draft compelling TikTok Shop violation appeals in seconds.",
         href: "/dashboard/appeals",
         icon: ShieldAlert,
-        status: "soon",
+        status: "live",
       },
       {
         title: "Creator Matcher",
@@ -81,7 +81,7 @@ const sections: ToolSection[] = [
           "Find the right creators for your product — niche, audience and style matched.",
         href: "/dashboard/creator-matcher",
         icon: Radar,
-        status: "soon",
+        status: "live",
       },
       {
         title: "Margin Calculator",
@@ -89,7 +89,7 @@ const sections: ToolSection[] = [
           "Calculate margins, fees and break-even prices before listing.",
         href: "/dashboard/calculator",
         icon: Calculator,
-        status: "soon",
+        status: "live",
       },
     ],
   },

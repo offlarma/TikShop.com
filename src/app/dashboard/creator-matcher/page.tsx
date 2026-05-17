@@ -5,8 +5,13 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { listGenerations } from "@/lib/db/generations";
 
-export default function CreatorMatcherPage() {
+import { CreatorMatcherTool } from "./creator-matcher-tool";
+
+export default async function CreatorMatcherPage() {
+  const history = await listGenerations("creator-matcher", 10);
+
   return (
     <div className="space-y-8">
       <div className="space-y-2">
@@ -22,11 +27,13 @@ export default function CreatorMatcherPage() {
         <CardHeader>
           <CardTitle>Find creators</CardTitle>
           <CardDescription>
-            The input form will live here. AI matching will be wired up in the
-            next phase.
+            We will produce 5 distinct creator personas plus a 7-day outreach
+            plan. Every match is saved automatically below.
           </CardDescription>
         </CardHeader>
-        <CardContent />
+        <CardContent>
+          <CreatorMatcherTool initialHistory={history} />
+        </CardContent>
       </Card>
     </div>
   );

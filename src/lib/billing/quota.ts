@@ -3,7 +3,12 @@ import "server-only";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { getPlanConfig } from "@/lib/billing/plans";
-import type { Plan, Subscription, SubscriptionStatus } from "@/types/db";
+import type {
+  Plan,
+  Subscription,
+  SubscriptionStatus,
+  Tool,
+} from "@/types/db";
 
 /** Statuses that should *not* grant access to the paid plan benefits. */
 const INACTIVE_STATUSES: SubscriptionStatus[] = [
@@ -112,7 +117,7 @@ export async function checkQuota(userId: string): Promise<QuotaCheckResult> {
 
 export async function recordUsageEvent(params: {
   userId: string;
-  tool: "ugc-scripts" | "outreach" | "copy-optimizer";
+  tool: Tool;
   generationId?: string | null;
 }): Promise<void> {
   // Same reasoning as insertGeneration: this is called from streamText's

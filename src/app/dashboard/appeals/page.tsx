@@ -5,8 +5,13 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { listGenerations } from "@/lib/db/generations";
 
-export default function ViolationAppealsPage() {
+import { AppealsTool } from "./appeals-tool";
+
+export default async function ViolationAppealsPage() {
+  const history = await listGenerations("appeals", 10);
+
   return (
     <div className="space-y-8">
       <div className="space-y-2">
@@ -15,18 +20,21 @@ export default function ViolationAppealsPage() {
         </h1>
         <p className="text-muted-foreground">
           Draft compelling TikTok Shop violation appeals in seconds — backed by
-          the platform&apos;s own policy language.
+          structured policy language.
         </p>
       </div>
       <Card>
         <CardHeader>
           <CardTitle>Generate an appeal</CardTitle>
           <CardDescription>
-            The input form will live here. AI generation will be wired up in
-            the next phase.
+            We will return a subject line, a structured appeal body and a
+            short evidence checklist. Every generation is saved automatically
+            below.
           </CardDescription>
         </CardHeader>
-        <CardContent />
+        <CardContent>
+          <AppealsTool initialHistory={history} />
+        </CardContent>
       </Card>
     </div>
   );

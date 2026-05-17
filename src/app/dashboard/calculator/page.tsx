@@ -6,6 +6,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
+import { CalculatorTool } from "./calculator-tool";
+
 export default function MarginCalculatorPage() {
   return (
     <div className="space-y-8">
@@ -15,18 +17,20 @@ export default function MarginCalculatorPage() {
         </h1>
         <p className="text-muted-foreground">
           Calculate margins, TikTok Shop fees and break-even prices before you
-          list a single product.
+          list a single product. Pure math — no AI, no monthly quota consumed.
         </p>
       </div>
       <Card>
         <CardHeader>
           <CardTitle>Run a calculation</CardTitle>
           <CardDescription>
-            The input form will live here. Calculations will be wired up in the
-            next phase.
+            Adjust any input and the results update live. Defaults reflect
+            typical TikTok Shop fees; tweak them for your category.
           </CardDescription>
         </CardHeader>
-        <CardContent />
+        <CardContent>
+          <CalculatorTool />
+        </CardContent>
       </Card>
     </div>
   );

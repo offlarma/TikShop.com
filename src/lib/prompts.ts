@@ -126,6 +126,182 @@ Constraints:
 - Do not invent product features that were not provided.`;
 }
 
+// ---------- Violation Appeals ----------
+
+export const appealInputSchema = z.object({
+  violationType: z
+    .enum([
+      "Counterfeit / IP claim",
+      "Misleading content",
+      "Product safety",
+      "Listing policy",
+      "Pricing / discount policy",
+      "Shipping / fulfillment",
+      "Account integrity",
+      "Other",
+    ])
+    .default("Other"),
+  affectedAsset: z
+    .string()
+    .trim()
+    .min(2, "Tell us which product / listing / account was affected.")
+    .max(200),
+  whatHappened: z
+    .string()
+    .trim()
+    .min(20, "Describe what happened in at least 20 characters.")
+    .max(2000),
+  evidence: z.string().trim().max(2000).optional().default(""),
+  desiredOutcome: z
+    .enum([
+      "Restore the listing",
+      "Restore the account",
+      "Remove the warning / strike",
+      "Reinstate eligibility for promotions",
+      "Other",
+    ])
+    .default("Restore the listing"),
+  tone: z
+    .enum(["Professional", "Firm but respectful", "Apologetic", "Concise"])
+    .default("Professional"),
+});
+
+export type AppealInput = z.infer<typeof appealInputSchema>;
+
+export function buildAppealPrompt(input: AppealInput) {
+  const evidence = input.evidence
+    ? input.evidence
+    : "(no additional evidence provided — work from the facts above)";
+
+  return `You are a senior TikTok Shop seller compliance specialist. Draft a
+formal appeal to TikTok Shop seller support for the case below.
+
+Violation type: ${input.violationType}
+Affected listing / product / account: ${input.affectedAsset}
+What happened (seller's account):
+"""
+${input.whatHappened}
+"""
+
+Supporting evidence:
+${evidence}
+
+Desired outcome: ${input.desiredOutcome}
+Tone: ${input.tone}
+
+Format the answer in Markdown with EXACTLY these sections:
+## Subject
+One concise subject line (≤ 80 chars) referencing the case.
+## Appeal letter
+The full appeal body, structured as four short paragraphs:
+1) Acknowledge the violation notice and reference the specific listing/account.
+2) Clearly state the facts and why the original decision should be reconsidered.
+3) Cite the supporting evidence (or the absence of any policy breach).
+4) State the desired outcome and offer to provide further information.
+## Evidence checklist
+A short bullet list (3-6 items) of documents / screenshots the seller
+should attach when sending the appeal.
+
+Constraints:
+- Strictly English.
+- Do not invent evidence or certifications that were not provided.
+- Reference TikTok Shop policy categories generically (no fabricated URLs).
+- Never threaten legal action or use aggressive language.
+- Keep the appeal body under 300 words.`;
+}
+
+// ---------- Creator Matcher ----------
+
+export const creatorMatcherInputSchema = z.object({
+  productDescription: z
+    .string()
+    .trim()
+    .min(10, "Describe the product in at least 10 characters.")
+    .max(1500),
+  targetAudience: z
+    .string()
+    .trim()
+    .min(2, "Tell us who the product is for.")
+    .max(200),
+  budgetRange: z
+    .enum([
+      "Affiliate / commission only",
+      "Under $100 per creator",
+      "$100 - $500 per creator",
+      "$500 - $2,000 per creator",
+      "$2,000+ per creator",
+    ])
+    .default("Affiliate / commission only"),
+  creatorTier: z
+    .enum([
+      "Nano (1k - 10k followers)",
+      "Micro (10k - 100k followers)",
+      "Mid (100k - 500k followers)",
+      "Macro (500k+ followers)",
+      "Any",
+    ])
+    .default("Micro (10k - 100k followers)"),
+  contentStyle: z
+    .string()
+    .trim()
+    .max(300)
+    .optional()
+    .default(""),
+  geography: z
+    .string()
+    .trim()
+    .max(200)
+    .optional()
+    .default("United States"),
+});
+
+export type CreatorMatcherInput = z.infer<typeof creatorMatcherInputSchema>;
+
+export function buildCreatorMatcherPrompt(input: CreatorMatcherInput) {
+  const contentStyle = input.contentStyle
+    ? input.contentStyle
+    : "no specific style preference — suggest a sensible default for the product";
+  const geo = input.geography || "United States";
+
+  return `You are a TikTok Shop creator-marketing strategist. Produce a
+shortlist of 5 distinct TikTok creator personas to target for the brand
+below. Do NOT invent real handles or usernames — describe archetypes the
+seller can search for.
+
+Product description:
+"""
+${input.productDescription}
+"""
+
+Target audience: ${input.targetAudience}
+Budget per creator: ${input.budgetRange}
+Creator tier: ${input.creatorTier}
+Content style preference: ${contentStyle}
+Geography: ${geo}
+
+Format the answer in Markdown with EXACTLY these sections:
+## Why this product needs creator marketing
+A 1-2 sentence positioning summary.
+## 5 creator personas to target
+For each persona use a third-level heading "### Persona N — <short label>"
+and include these bullets:
+- **Niche & content type**: ...
+- **Typical follower range**: ...
+- **Why they fit**: 1 sentence
+- **Where to find them**: TikTok search query or hashtags to try
+- **Outreach angle**: 1 line, what to lead with in the DM
+- **Red flags to avoid**: 1 short line
+## Suggested next 7-day outreach plan
+A bulleted list (5-7 bullets) of concrete actions for the seller this
+week (e.g. "Send 20 DMs to Persona 1 with this angle...").
+
+Constraints:
+- Strictly English.
+- Five personas, each clearly distinct in angle / audience.
+- Do not invent real TikTok handles or follower counts. Use ranges only.
+- Be specific to the product and audience above — no generic advice.`;
+}
+
 // ---------- Copy Optimizer ----------
 
 export const copyOptimizerInputSchema = z.object({
