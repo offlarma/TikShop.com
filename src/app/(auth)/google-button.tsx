@@ -49,7 +49,12 @@ export function GoogleButton({
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: `${window.location.origin}/auth/callback?next=/dashboard`,
+          // Important: this redirectTo MUST exactly match one of the URLs
+          // listed under Supabase → Authentication → URL Configuration →
+          // Redirect URLs. Supabase's allow-list compares the URL including
+          // its query string, so we keep this path bare and let
+          // /auth/callback default `next` to /dashboard internally.
+          redirectTo: `${window.location.origin}/auth/callback`,
           // Force account picker so users with multiple Google accounts can
           // choose which one to use.
           queryParams: { prompt: "select_account" },

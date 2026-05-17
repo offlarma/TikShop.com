@@ -22,7 +22,23 @@ export const metadata: Metadata = {
   },
 };
 
-export default async function HomePage() {
+export default async function HomePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ code?: string; error?: string }>;
+}) {
+  // Defense in depth for OAuth: if Supabase's allow-list ever falls back
+  // to the Site URL (this page) and parks the auth `code` here as a
+  // query string, forward the whole thing to /auth/callback so the
+  // session can be exchanged properly. The user never sees the landing.
+  const { code, error } = await searchParams;
+  if (code) {
+    redirect(`/auth/callback?code=${encodeURIComponent(code)}`);
+  }
+  if (error) {
+    redirect(`/login?error=${encodeURIComponent(error)}`);
+  }
+
   // Show the marketing page to logged-out visitors; redirect signed-in
   // users straight to their dashboard. The auth check is wrapped so the
   // landing still renders if Supabase env vars are missing or invalid.
