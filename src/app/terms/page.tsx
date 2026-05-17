@@ -34,6 +34,13 @@ export default function TermsPage() {
           tools (the &quot;Service&quot;).
         </p>
         <p>
+          <strong>TikShopDrop is an independent product and is not
+          affiliated with, endorsed by, or sponsored by TikTok Inc. or
+          TikTok Shop.</strong> All product names, logos and brands
+          referenced on the Service are the property of their respective
+          owners.
+        </p>
+        <p>
           Please also read our{" "}
           <Link
             href="/privacy"

@@ -27,8 +27,8 @@ export default function PrivacyPage() {
       <LegalSection id="who-we-are" number={1} title="Who we are">
         <p>
           TikShopDrop (&quot;TikShopDrop&quot;, &quot;we&quot;, &quot;our&quot;
-          or &quot;us&quot;) is a software-as-a-service product for TikTok Shop
-          sellers. The service is operated by{" "}
+          or &quot;us&quot;) is an independent software-as-a-service product
+          for TikTok Shop sellers. The service is operated by{" "}
           <strong>[Your legal business name]</strong>, located at{" "}
           <strong>[Your business address]</strong>. You can reach us at{" "}
           <a
@@ -38,6 +38,13 @@ export default function PrivacyPage() {
             {CONTACT_EMAIL}
           </a>
           .
+        </p>
+        <p>
+          <strong>TikShopDrop is not affiliated with, endorsed by, or
+          sponsored by TikTok Inc. or TikTok Shop.</strong> All product
+          names, logos and brands mentioned on this site or in the
+          application are the property of their respective owners and are
+          referenced for descriptive purposes only.
         </p>
       </LegalSection>
 

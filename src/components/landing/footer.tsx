@@ -33,9 +33,17 @@ export function LandingFooter() {
       </div>
 
       <div className="border-t border-border/60">
-        <div className="mx-auto flex w-full max-w-6xl flex-col items-center justify-between gap-2 px-4 py-6 text-xs text-muted-foreground sm:flex-row sm:px-6">
-          <p>© {year} TikShopDrop. All rights reserved.</p>
-          <p>Made for TikTok Shop sellers.</p>
+        <div className="mx-auto flex w-full max-w-6xl flex-col gap-3 px-4 py-6 text-xs text-muted-foreground sm:px-6">
+          <p className="text-center text-[11px] leading-relaxed">
+            TikShopDrop is an independent product and is not affiliated with,
+            endorsed by, or sponsored by TikTok Inc. or TikTok Shop. All
+            product names, logos and brands are property of their respective
+            owners.
+          </p>
+          <div className="flex flex-col items-center justify-between gap-1 sm:flex-row">
+            <p>© {year} TikShopDrop. All rights reserved.</p>
+            <p>Made for TikTok Shop sellers.</p>
+          </div>
         </div>
       </div>
     </footer>

@@ -21,25 +21,25 @@ export function LandingHero() {
         <FadeUp immediate delay={0} className="mb-6">
           <span className="inline-flex items-center gap-2 rounded-full border border-border/70 bg-background/60 px-3 py-1 text-xs font-medium text-muted-foreground backdrop-blur">
             <Sparkles className="h-3 w-3" />
-            The 3-in-1 AI growth suite for TikTok Shop
+            AI tools, built for TikTok Shop sellers
           </span>
         </FadeUp>
 
         <FadeUp immediate delay={0.08}>
           <h1 className="max-w-4xl text-balance text-4xl font-semibold tracking-tight sm:text-6xl md:text-7xl">
-            Scale your TikTok Shop to{" "}
+            The AI toolkit for{" "}
             <span className="bg-gradient-to-b from-foreground to-foreground/60 bg-clip-text text-transparent">
-              $100K/mo
+              TikTok Shop
             </span>{" "}
-            with AI.
+            sellers.
           </h1>
         </FadeUp>
 
         <FadeUp immediate delay={0.18}>
           <p className="mt-6 max-w-2xl text-pretty text-base leading-relaxed text-muted-foreground sm:text-lg">
-            TikShopDrop turns one product brief into viral UGC scripts,
-            personalized affiliate outreach and conversion-ready copy —
-            in seconds, not afternoons.
+            TikShopDrop turns one product brief into UGC scripts, affiliate
+            outreach drafts and conversion-focused copy — in seconds, from a
+            single dashboard.
           </p>
         </FadeUp>
 
